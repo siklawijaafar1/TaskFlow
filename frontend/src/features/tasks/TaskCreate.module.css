@@ -1,0 +1,184 @@
+/* ================================================================
+   TaskCreate — formulaire de création de tâche
+   ================================================================ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Erreur globale ── */
+.globalError {
+  padding: var(--space-3) var(--space-4);
+  background: var(--priority-urgent-bg);
+  border: 1px solid var(--priority-urgent-border);
+  border-radius: var(--radius);
+  color: var(--priority-urgent-color);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+/* ── Champ individuel ── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text);
+}
+
+.required {
+  color: var(--priority-urgent-color);
+  margin-left: 2px;
+}
+
+/* ── Contrôles ── */
+.input,
+.textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  appearance: none;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(79 70 229 / 0.12);
+}
+
+.input:disabled,
+.textarea:disabled {
+  background: var(--color-bg);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: var(--priority-urgent-color);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 0.12);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ── Erreur par champ ── */
+.fieldError {
+  font-size: var(--text-xs);
+  color: var(--priority-urgent-color);
+  font-weight: var(--font-medium);
+}
+
+/* ── Ligne à deux colonnes ── */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.btnPrimary {
+  padding: var(--space-2) var(--space-5);
+  min-height: 44px; /* Audit UI — WCAG 2.5.5 : zone de clic ≥ 44×44px sur mobile */
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: #ffffff;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btnSecondary {
+  padding: var(--space-2) var(--space-5);
+  min-height: 44px; /* Audit UI — WCAG 2.5.5 : zone de clic ≥ 44×44px sur mobile */
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: var(--color-bg);
+  border-color: var(--color-muted);
+}
+
+.btnSecondary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Bannière succès ── */
+.successBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  background: var(--status-done-bg);
+  border: 1px solid var(--status-done-border);
+  border-radius: var(--radius-md);
+  color: var(--status-done-color);
+  font-weight: var(--font-medium);
+}
+
+.successIcon {
+  font-size: var(--text-3xl);
+}
+
+.successBanner p {
+  font-size: var(--text-base);
+  margin: 0;
+}
+
+.successActions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
