@@ -24,7 +24,7 @@ async function update(organizationId, id, data) {
 async function remove(organizationId, id) {
   const project = await projectRepository.findById(organizationId, id);
   if (!project) throw createError(403, 'Project not found');
-  return projectRepository.remove(organizationId, id);
+  return projectRepository.softDelete(organizationId, id); // R12 — soft-delete
 }
 
 module.exports = { list, create, getById, update, remove };

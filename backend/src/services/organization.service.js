@@ -33,7 +33,7 @@ async function inviteMember(organizationId, { email, name, role = 'member', pass
 async function removeMember(organizationId, userId) {
   const user = await userRepository.findById(organizationId, userId);
   if (!user) throw createError(403, 'Member not found');
-  return userRepository.remove(organizationId, userId);
+  return userRepository.softDelete(organizationId, userId); // R12 — soft-delete
 }
 
 module.exports = { getById, update, listMembers, inviteMember, removeMember };

@@ -29,8 +29,12 @@ async function update(organizationId, id, data) {
   return row;
 }
 
-function remove(organizationId, id) {
-  return db(TABLE).where({ id, organization_id: organizationId }).delete();
+// R12 — soft-delete : jamais de DELETE physique sur une entité utilisateur (F2)
+function softDelete(organizationId, id) {
+  return db(TABLE)
+    .where({ id, organization_id: organizationId })
+    .whereNull('deleted_at')
+    .update({ deleted_at: db.fn.now() });
 }
 
-module.exports = { findAllByOrg, findById, create, update, remove };
+module.exports = { findAllByOrg, findById, create, update, softDelete };
