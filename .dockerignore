@@ -1,0 +1,19 @@
+# .dockerignore — exclude files from Docker build context
+node_modules
+.env
+.env.*
+.git
+.github
+e2e
+docs
+coverage
+playwright-report
+*.md
+!README.md
+backend/node_modules
+frontend/node_modules
+backend/.env
+frontend/.env
+**/__tests__
+**/*.test.js
+**/*.spec.js

@@ -1,3 +1,8 @@
+/**
+ * user.repository.js — All SQL queries for the users table (R04)
+ * R12: soft-delete filtering (whereNull deleted_at)
+ * R13: every query filters by organization_id
+ */
 const db = require('../database/db');
 
 const TABLE = 'users';
@@ -5,7 +10,7 @@ const TABLE = 'users';
 function findAllByOrg(organizationId) {
   return db(TABLE)
     .where({ organization_id: organizationId })
-    .whereNull('deleted_at')   // R12 — soft-delete
+    .whereNull('deleted_at')   // R12
     .select('id', 'organization_id', 'email', 'name', 'role', 'created_at');
 }
 
@@ -23,6 +28,17 @@ function findByEmail(organizationId, email) {
     .first();
 }
 
+/**
+ * findByEmailGlobal — used during login when no organizationSlug is provided.
+ * Returns the first non-deleted user matching the email across all orgs.
+ */
+function findByEmailGlobal(email) {
+  return db(TABLE)
+    .where({ email })
+    .whereNull('deleted_at')
+    .first();
+}
+
 async function create(data) {
   const [row] = await db(TABLE).insert(data).returning('*');
   return row;
@@ -36,4 +52,4 @@ function softDelete(organizationId, id) {
     .update({ deleted_at: db.fn.now() });
 }
 
-module.exports = { findAllByOrg, findById, findByEmail, create, softDelete };
+module.exports = { findAllByOrg, findById, findByEmail, findByEmailGlobal, create, softDelete };

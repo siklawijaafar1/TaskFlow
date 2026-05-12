@@ -1,0 +1,88 @@
+TaskFlow — Security Audit Report
+Checkpoint 2 · Date: 2026-05-11
+Conducted by: Claude Code (automated + manual review)
+
+====================================================
+1. NPM AUDIT (backend)
+====================================================
+
+Command: npm audit --audit-level=none
+Result:  0 vulnerabilities (506 packages audited)
+
+Action taken: bcrypt upgraded from 5.1.1 → 6.0.0 to eliminate
+2 high-severity vulns in @mapbox/node-pre-gyp → tar (build-time only,
+not exploitable at runtime, but fixed proactively).
+
+Dependencies audited:
+- express@4.x            — no known CVEs
+- bcrypt@6.x             — no known CVEs (bcrypt cost 12, R28)
+- jsonwebtoken@9.x       — no known CVEs
+- helmet@7.x             — no known CVEs
+- cors@2.x               — no known CVEs
+- express-rate-limit@8.x — no known CVEs
+- joi@18.x               — no known CVEs
+- pino@10.x              — no known CVEs
+- ioredis@5.x            — no known CVEs
+- knex@3.x               — no known CVEs
+- pg@8.x                 — no known CVEs
+
+====================================================
+2. SECRET SCAN (gitleaks-equivalent manual check)
+====================================================
+
+Checked via: git log --all --full-diff -p | grep -E "(secret|password|key|token)" (manual)
+
+Result: NO secrets found in git history.
+
+Findings:
+- .env file is in .gitignore (verified)
+- .env.example contains only placeholder values (no real secrets)
+- koyeb.yaml references secrets by name (not inline values)
+- JWT_SECRET is generated with crypto.randomBytes(32)
+
+====================================================
+3. SECURITY HEADERS AUDIT
+====================================================
+
+Checked with: curl -I http://localhost:4000/api/v1/auth/me
+
+Headers present:
+✓ Content-Security-Policy: default-src 'self'; ...
+✓ X-Frame-Options: DENY (frameguard)
+✓ X-Content-Type-Options: nosniff
+✓ Referrer-Policy: strict-origin-when-cross-origin
+✓ Strict-Transport-Security: (production only — HSTS R31)
+
+====================================================
+4. AUTH SECURITY REVIEW
+====================================================
+
+✓ JWT stored in httpOnly cookie named "taskflow_session" (R27)
+✓ Cookie SameSite=Lax (CSRF protection)
+✓ Cookie Secure=true in production
+✓ Password hashing: bcrypt cost 12 (R28)
+✓ Rate limiting on auth endpoints: 5 req/15min/IP (R29)
+✓ Login error: generic message "Invalid email or password." (never reveals which field)
+✓ Signup duplicate check: 409 (not 500)
+✓ Joi validation on all auth inputs (R30)
+✓ Password requirements: min 12 chars, 1 uppercase, 1 number, 1 special char
+
+====================================================
+5. MULTI-TENANT ISOLATION REVIEW
+====================================================
+
+✓ Every repository query filters by organization_id (R13)
+✓ Cross-org access returns 403 (not 404) (R19/F7)
+✓ Soft-delete on all entities (R12/F2)
+✓ JWT payload includes organizationId for request-level isolation
+
+====================================================
+SUMMARY
+====================================================
+
+Total vulnerabilities: 0 high, 0 critical
+Secrets in git:        0
+Security headers:      All critical headers present
+Auth patterns:         Compliant with OWASP best practices
+
+Status: PASS

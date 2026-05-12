@@ -138,7 +138,45 @@ Les patterns suivants sont interdits. Claude Code ne les produira jamais, même 
 
 ---
 
-## 8. Always-On Behaviors
+## 8. Security Rules
+
+- R27 · Authentification : JWT en cookie `httpOnly`, `Secure`, `SameSite=Lax`. Jamais `localStorage`.
+- R28 · Hachage de mot de passe : bcrypt avec facteur de coût ≥ 12. Jamais MD5, SHA-256, ou texte clair.
+- R29 · Rate limit sur les endpoints d'auth : 5 tentatives par 15 minutes par IP. Réponse 429 avec `retry_after`.
+- R30 · Valider **tous** les inputs utilisateur avec Joi à la frontière de la route. Ne jamais faire confiance à `req.body` sans validation.
+- R31 · Headers de sécurité via Helmet : CSP, HSTS (prod uniquement), X-Frame-Options: deny, X-Content-Type-Options: nosniff, Referrer-Policy.
+- R32 · CORS : liste d'origines explicites (`CORS_ORIGIN` env). Jamais de wildcard `*` en production.
+- R33 · Secrets via variables d'environnement uniquement. Ne jamais committer `.env`. Ne jamais hardcoder.
+
+---
+
+## 9. Testing Rules (E2E)
+
+- R34 · Les tests E2E couvrent les parcours critiques : inscription, connexion, création de tâche, visualisation de tâche.
+- R35 · Les tests E2E tournent contre une base de test dédiée (`taskflow_test_e2e`), isolée de la base dev et de la base unit-test.
+- R36 · Chaque test E2E est indépendant : pas d'état partagé entre les tests, fixtures réinitialisées dans `beforeEach`.
+
+---
+
+## 10. Deployment Rules
+
+- R37 · Dockerfiles multi-stage : séparer le stage build du stage runtime. L'image finale utilise une base slim (alpine).
+- R38 · Exécuter en tant qu'utilisateur non-root dans les conteneurs (`USER 1000` ou utilisateur nommé).
+- R39 · Endpoint de healthcheck à `GET /healthz` retournant 200 + JSON status (inclut un ping DB).
+- R40 · Koyeb est la plateforme de production. Région unique proche d'Abidjan : `fra` (Frankfurt).
+- R41 · Pas de secrets dans `Dockerfile` ou `koyeb.yaml`. Tous via `koyeb secret create`.
+
+---
+
+## 11. Observability Rules
+
+- R42 · Logs structurés en JSON. Jamais de `console.log()` en code de production. Utiliser Pino avec `level=info` par défaut, `level=debug` en dev.
+- R43 · Chaque requête reçoit un `correlation_id` (UUID v4) à l'entrée, propagé dans tous les logs et appels downstream.
+- R44 · Chaque log d'erreur inclut : `correlation_id`, `user_id` (si connu), `organization_id` (si connu), `error.name`, `error.message`, `error.stack`.
+
+---
+
+## 12. Always-On Behaviors
 
 Ces comportements s'appliquent **automatiquement**, sans qu'il soit nécessaire de les demander.
 
