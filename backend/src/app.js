@@ -79,7 +79,9 @@ if (process.env.NODE_ENV === 'test_e2e') {
 // 11. Error handler — MUST be last
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
+// API_PORT = port interne Express (toujours 4000 derrière nginx)
+// PORT     = port externe scanné par Render (8080 = nginx)
+const PORT = process.env.API_PORT || 4000;
 
 if (require.main === module) {
   app.listen(PORT, () => {
