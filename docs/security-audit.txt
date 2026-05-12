@@ -6,24 +6,25 @@ Conducted by: Claude Code (automated + manual review)
 1. NPM AUDIT (backend)
 ====================================================
 
-Command: npm audit --production --audit-level=high
-Result:  0 high severity vulnerabilities
-         0 critical severity vulnerabilities
+Command: npm audit --audit-level=none
+Result:  0 vulnerabilities (506 packages audited)
 
-All production dependencies are up-to-date as of 2026-05-11.
+Action taken: bcrypt upgraded from 5.1.1 → 6.0.0 to eliminate
+2 high-severity vulns in @mapbox/node-pre-gyp → tar (build-time only,
+not exploitable at runtime, but fixed proactively).
 
 Dependencies audited:
-- express@4.x        — no known CVEs
-- bcrypt@5.x         — no known CVEs (bcrypt cost 12, R28)
-- jsonwebtoken@9.x   — no known CVEs
-- helmet@7.x         — no known CVEs
-- cors@2.x           — no known CVEs
-- express-rate-limit@7.x — no known CVEs
-- joi@17.x           — no known CVEs
-- pino@9.x           — no known CVEs
-- ioredis@5.x        — no known CVEs
-- knex@3.x           — no known CVEs
-- pg@8.x             — no known CVEs
+- express@4.x            — no known CVEs
+- bcrypt@6.x             — no known CVEs (bcrypt cost 12, R28)
+- jsonwebtoken@9.x       — no known CVEs
+- helmet@7.x             — no known CVEs
+- cors@2.x               — no known CVEs
+- express-rate-limit@8.x — no known CVEs
+- joi@18.x               — no known CVEs
+- pino@10.x              — no known CVEs
+- ioredis@5.x            — no known CVEs
+- knex@3.x               — no known CVEs
+- pg@8.x                 — no known CVEs
 
 ====================================================
 2. SECRET SCAN (gitleaks-equivalent manual check)

@@ -126,7 +126,7 @@ export default function TaskCreate({ projects = [], onCreated, onCancel }) {
           }
         }
       } else if (err.status === 403) {
-        setGlobalError('Vous n'avez pas accès à ce projet.');
+        setGlobalError("Vous n'avez pas accès à ce projet.");
       } else {
         // Message générique — ne pas exposer les détails techniques (R26)
         setGlobalError('Une erreur est survenue. Veuillez réessayer.');
