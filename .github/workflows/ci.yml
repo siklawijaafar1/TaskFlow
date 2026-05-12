@@ -2,11 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, checkpoint-2]
   pull_request:
     branches: [main]
 
 jobs:
+  # ── Backend: unit + integration tests ──────────────────────────────────────
   backend-test:
     name: Backend tests
     runs-on: ubuntu-latest
@@ -15,26 +16,26 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: taskflow_test
+          POSTGRES_USER:     taskflow
+          POSTGRES_PASSWORD: ci_test_password
+          POSTGRES_DB:       taskflow_test
         ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 5s
-          --health-timeout 5s
+          --health-timeout 3s
           --health-retries 5
 
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
+    env:
+      NODE_ENV:         test
+      TEST_DB_HOST:     localhost
+      TEST_DB_PORT:     5432
+      TEST_DB_NAME:     taskflow_test
+      TEST_DB_USER:     taskflow
+      TEST_DB_PASSWORD: ci_test_password
+      JWT_SECRET:       ci_test_jwt_secret_min_32_chars_for_validation
+      COOKIE_SECRET:    ci_test_cookie_secret
 
     defaults:
       run:
@@ -43,29 +44,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: '20'
+          cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
-      - run: npm ci
+      - name: Install deps
+        run: npm ci
 
-      - run: npm test
-        env:
-          NODE_ENV: test
-          JWT_SECRET: ci_test_secret
-          COOKIE_SECRET: ci_cookie_secret
-          TEST_DB_HOST: localhost
-          TEST_DB_PORT: 5432
-          TEST_DB_NAME: taskflow_test
-          TEST_DB_USER: postgres
-          TEST_DB_PASSWORD: postgres
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
+      - name: Run migrations on test DB
+        run: NODE_ENV=test npx knex migrate:latest
 
+      - name: Run tests
+        run: npm test
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+
+  # ── Frontend: unit tests ───────────────────────────────────────────────────
   frontend-test:
-    name: Frontend unit tests
+    name: Frontend tests
     runs-on: ubuntu-latest
 
     defaults:
@@ -75,15 +79,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: '20'
+          cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - run: npm ci
-      - run: npm test
+      - name: Install deps
+        run: npm ci
 
+      - name: Run tests
+        run: npm test
+
+  # ── Docker build validation ────────────────────────────────────────────────
   docker-build:
     name: Docker build check
     runs-on: ubuntu-latest
@@ -92,8 +101,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend image
-        run: docker build --target production -t taskflow-backend ./backend
+      - name: Build mono-container image
+        run: docker build -t taskflow:ci .
 
-      - name: Build frontend image
-        run: docker build --target production -t taskflow-frontend ./frontend
+      - name: Verify image size
+        run: docker images taskflow:ci --format "{{.Size}}"
+
+  # ── Security audit ─────────────────────────────────────────────────────────
+  security-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend deps
+        run: npm ci
+        working-directory: backend
+
+      - name: Audit (high+critical)
+        run: npm audit --audit-level=high --production
+        working-directory: backend
+        continue-on-error: true

@@ -32,7 +32,7 @@ function makeAuthCookie(userId, orgId, role = 'member') {
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
-  return `token=${token}`;
+  return `taskflow_session=${token}`;
 }
 
 // ── UUIDs fixes pour données de test déterministes ───────────────────────────
